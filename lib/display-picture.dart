@@ -10,7 +10,7 @@ class DisplayPictureScreen extends StatelessWidget {
   Widget build(BuildContext context){
   return Scaffold(
     appBar: AppBar(
-      title: Text("Cameptured Image"),
+      title: Text("Imagem"),
     ),
     body: Center(
       child: Image.file((File(imagePath))),

@@ -16,9 +16,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter IA Camera',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.black),
+        colorScheme: .fromSeed(seedColor: Colors.black) 
       ),
       home: CameraScreen(cameras: _cameras),
     );

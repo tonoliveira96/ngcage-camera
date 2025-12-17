@@ -7,13 +7,10 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class CameraScreen extends StatefulWidget{
+class CameraScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
 
-  const CameraScreen({
-    super.key, 
-    required this.cameras, 
-  });
+  const CameraScreen({super.key, required this.cameras});
 
   @override
   _CameraScreenState createState() => _CameraScreenState();
@@ -26,20 +23,20 @@ class _CameraScreenState extends State<CameraScreen> {
   bool permissionGranted = false;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     requestCameraPermission();
   }
 
-  Future<void> requestCameraPermission() async{
+  Future<void> requestCameraPermission() async {
     final status = await Permission.camera.request();
 
-    if(status.isGranted){
-      permissionGranted= true;
+    if (status.isGranted) {
+      permissionGranted = true;
       initializeCamera(selectedCameraIndex);
-    }else{
+    } else {
       setState(() {
-        permissionGranted= false;
+        permissionGranted = false;
       });
     }
   }
@@ -47,28 +44,31 @@ class _CameraScreenState extends State<CameraScreen> {
   void initializeCamera(int index) async {
     if (widget.cameras.isEmpty) return;
 
-    controller = CameraController(widget.cameras[index], ResolutionPreset.medium);
+    controller = CameraController(
+      widget.cameras[index],
+      ResolutionPreset.medium,
+    );
 
-    try{
+    try {
       await controller.initialize();
       setState(() {
         isInitialized = true;
         selectedCameraIndex = index;
       });
-    }catch(e){
+    } catch (e) {
       print("Camera rejected");
     }
   }
 
-  Future<void> takePicture(BuildContext context)async{
-    if(!controller.value.isInitialized) return;
+  Future<void> takePicture(BuildContext context) async {
+    if (!controller.value.isInitialized) return;
 
     final directory = await getExternalStorageDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final path = join(directory!.path,'IMG_$timestamp.png');
+    final path = join(directory!.path, 'IMG_$timestamp.png');
     await File(path).create(recursive: true);
 
-     try {
+    try {
       final file = await controller.takePicture();
       await file.saveTo(path);
 
@@ -86,62 +86,63 @@ class _CameraScreenState extends State<CameraScreen> {
   void switchCamera() async {
     final newIndex = (selectedCameraIndex + 1) % widget.cameras.length;
     setState(() {
-      isInitialized= false;
+      isInitialized = false;
     });
 
     await controller.dispose();
     initializeCamera(newIndex);
   }
-  
+
   @override
-  void dispose(){
-    if(controller.value.isInitialized){
+  void dispose() {
+    if (controller.value.isInitialized) {
       controller.dispose();
     }
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context){
-    if(!permissionGranted){
+  Widget build(BuildContext context) {
+    if (!permissionGranted) {
       return Scaffold(
-        body: Center(
-          child: Text('Please grant camera permission!'),
-        ),
+        body: Center(child: Text('Please grant camera permission!')),
       );
     }
 
-    if(!isInitialized){
-      return Scaffold(
-       body: Center(
-          child: CircularProgressIndicator()
-        ),
-      );
+    if (!isInitialized) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter IA Camera'),
+        backgroundColor: Colors.black,
         actions: [
-          IconButton(onPressed: switchCamera, icon: Icon(Icons.switch_camera))
+          IconButton(
+            onPressed: switchCamera,
+            icon: Icon(Icons.switch_camera, color: Colors.white),
+          ),
         ],
       ),
-      body:SafeArea(child: Stack(
-        children: [
-          SizedBox.expand(
-            child: CameraPreview(controller),
-          ),
-          Positioned(
-            bottom: 32,
-            left: 0,
-            right: 0,
-            child: Center(
-            child: Center(
-              child: IconButton(onPressed: ()=> takePicture(context), icon: Icon(Icons.camera, size: 80, color: Colors.white,)),
-            ) ,
-          ))
-        ],
-      )) ,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SizedBox.expand(child: CameraPreview(controller)),
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Center(
+                  child: IconButton(
+                    onPressed: () => takePicture(context),
+                    icon: Icon(Icons.camera, size: 80, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
