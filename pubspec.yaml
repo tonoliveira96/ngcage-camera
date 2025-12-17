@@ -1,5 +1,5 @@
 name: iacamera
-description: "A new Flutter project."
+description: "IA Camera detector."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -40,6 +40,7 @@ dependencies:
   permission_handler: ^12.0.1
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -52,6 +53,12 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Icons
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:
