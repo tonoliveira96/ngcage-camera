@@ -94,7 +94,18 @@ A política de privacidade está disponível no arquivo:
 
 ➡️ [`PRIVACY_POLICY.md`](./PRIVACY_POLICY.md)
 
-Ela pode ser reutilizada em outros projetos.
+---
+
+## 🔐 Privacidade e uso
+
+Este projeto é destinado a **fins educacionais e experimentais**.
+
+O modelo:
+- Não realiza identificação biométrica
+- Não armazena imagens do usuário
+- Executa todo o processamento localmente no dispositivo
+
+Antes de publicar o aplicativo, verifique as políticas de privacidade e uso aplicáveis à sua plataforma.
 
 ---
 
