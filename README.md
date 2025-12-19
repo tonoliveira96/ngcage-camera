@@ -1,4 +1,4 @@
-# 📷 NCage Camera – Offline AI Object Detection (Flutter + TFLite)
+# 📷 NCage Camera – Offline AI Detection
 
 Aplicativo mobile desenvolvido em **Flutter** que utiliza **Inteligência Artificial offline** para análise de imagens capturadas pela câmera do dispositivo.
 
@@ -92,7 +92,7 @@ Todas as permissões são utilizadas **exclusivamente para funcionamento do app*
 
 A política de privacidade está disponível no arquivo:
 
-➡️ [`PRIVACY_POLICY.md`](./PRIVACY_POLICY.md)
+➡️ [`privacy-policies.md`](./privacy-policies.md)
 
 ---
 
