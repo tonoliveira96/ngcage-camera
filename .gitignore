@@ -48,3 +48,5 @@ app.*.map.json
 *.keras
 saved_model/
 
+/android/build/reports/problems/**
+
