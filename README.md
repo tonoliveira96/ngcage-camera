@@ -1,4 +1,4 @@
-# 📷 NCage Camera – Offline AI Detection
+# 📷 NCG Camera – Offline AI Detection
 
 Aplicativo mobile desenvolvido em **Flutter** que utiliza **Inteligência Artificial offline** para análise de imagens capturadas pela câmera do dispositivo.
 

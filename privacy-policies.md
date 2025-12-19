@@ -2,7 +2,7 @@
 
 Última atualização: 17 de Dezembro de 2025
 
-Esta Política de Privacidade descreve como o aplicativo **NCage Camera**, desenvolvido por **TonOliveiraDev**, coleta, usa e protege as informações dos usuários.
+Esta Política de Privacidade descreve como o aplicativo **NCG Camera**, desenvolvido por **TonOliveiraDev**, coleta, usa e protege as informações dos usuários.
 
 Ao utilizar este aplicativo, você concorda com os termos descritos nesta política.
 
@@ -10,7 +10,7 @@ Ao utilizar este aplicativo, você concorda com os termos descritos nesta polít
 
 ## 1. Informações que coletamos
 
-O **NCage Camera** **não coleta, armazena ou compartilha dados pessoais identificáveis** dos usuários.
+O **NCG Camera** **não coleta, armazena ou compartilha dados pessoais identificáveis** dos usuários.
 
 O aplicativo pode acessar os seguintes recursos do dispositivo **apenas para funcionamento local**:
 
@@ -45,7 +45,7 @@ Essas permissões são utilizadas **somente quando necessárias** e **exclusivam
 
 ## 4. Compartilhamento de dados
 
-O **NCage Camera** **não compartilha dados com terceiros**, incluindo:
+O **NCG Camera** **não compartilha dados com terceiros**, incluindo:
 
 - Anunciantes
 - Plataformas de análise
@@ -89,4 +89,4 @@ Se você tiver qualquer dúvida sobre esta Política de Privacidade ou sobre o f
 
 ## 9. Consentimento
 
-Ao utilizar o **NCage Camera**, você declara que leu, compreendeu e concorda com esta Política de Privacidade.
+Ao utilizar o **NCG Camera**, você declara que leu, compreendeu e concorda com esta Política de Privacidade.
