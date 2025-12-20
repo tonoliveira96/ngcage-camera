@@ -2,7 +2,7 @@
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:iacamera/display-picture.dart';
+import 'package:iacamera/display_picture.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,10 +13,10 @@ class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key, required this.cameras});
 
   @override
-  _CameraScreenState createState() => _CameraScreenState();
+  CameraScreenState createState() => CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class CameraScreenState extends State<CameraScreen> {
   late CameraController controller;
   int selectedCameraIndex = 0;
   bool isInitialized = false;
@@ -119,7 +119,7 @@ class _CameraScreenState extends State<CameraScreen> {
         actions: [
           IconButton(
             onPressed: switchCamera,
-            icon: Icon(Icons.switch_camera, color: Colors.white),
+            icon: Icon(Icons.switch_camera, color: Colors.amber),
           ),
         ],
       ),
@@ -135,7 +135,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: Center(
                   child: IconButton(
                     onPressed: () => takePicture(context),
-                    icon: Icon(Icons.camera, size: 80, color: Colors.white),
+                    icon: Icon(Icons.camera, size: 80, color: Colors.amber),
                   ),
                 ),
               ),

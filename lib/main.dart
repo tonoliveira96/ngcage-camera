@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.black) 
+        colorScheme: .fromSeed(seedColor: Colors.black45) 
       ),
       home: CameraScreen(cameras: _cameras),
     );
