@@ -2,7 +2,9 @@
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iacamera/display_picture.dart';
+import 'package:iacamera/services/ai_service.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,11 +23,22 @@ class CameraScreenState extends State<CameraScreen> {
   int selectedCameraIndex = 0;
   bool isInitialized = false;
   bool permissionGranted = false;
+  bool _aiInitialized = false;
+  final AIService _aiService = AIService();
 
   @override
   void initState() {
     super.initState();
     requestCameraPermission();
+    _checkAIStatus();
+  }
+
+  Future<void> _checkAIStatus() async {
+    if (mounted) {
+      setState(() {
+        _aiInitialized = _aiService.isInitialized;
+      });
+    }
   }
 
   Future<void> requestCameraPermission() async {
@@ -51,17 +64,19 @@ class CameraScreenState extends State<CameraScreen> {
 
     try {
       await controller.initialize();
-      setState(() {
-        isInitialized = true;
-        selectedCameraIndex = index;
-      });
+      if (mounted) {
+        setState(() {
+          isInitialized = true;
+          selectedCameraIndex = index;
+        });
+      }
     } catch (e) {
-      print("Camera rejected");
+      debugPrint('Erro ao inicializar câmera: $e');
     }
   }
 
   Future<void> takePicture(BuildContext context) async {
-    if (!controller.value.isInitialized) return;
+    if (!controller.value.isInitialized || !mounted) return;
 
     final directory = await getExternalStorageDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -72,14 +87,27 @@ class CameraScreenState extends State<CameraScreen> {
       final file = await controller.takePicture();
       await file.saveTo(path);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => DisplayPictureScreen(imagePath: path),
-        ),
-      );
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DisplayPictureScreen(
+              imagePath: path,
+              interpreter: _aiInitialized ? _aiService.interpreter : null,
+              labels: _aiInitialized ? _aiService.labels : null,
+            ),
+          ),
+        );
+      }
     } catch (e) {
-      print('Error taking picture: $e');
+      debugPrint('Error taking picture: $e');
+      Fluttertoast.showToast(
+        msg: 'Erro ao capturar imagem: $e',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -95,8 +123,12 @@ class CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
-    if (controller.value.isInitialized) {
-      controller.dispose();
+    try {
+      if (controller.value.isInitialized) {
+        controller.dispose();
+      }
+    } catch (e) {
+      debugPrint('Erro ao liberar câmera: $e');
     }
     super.dispose();
   }
@@ -116,10 +148,19 @@ class CameraScreenState extends State<CameraScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
+        title: _aiInitialized
+            ? Text(
+                'IA Ativa',
+                style: TextStyle(color: Colors.greenAccent, fontSize: 14),
+              )
+            : Text(
+                'IA Inativa',
+                style: TextStyle(color: Colors.orangeAccent, fontSize: 14),
+              ),
         actions: [
           IconButton(
             onPressed: switchCamera,
-            icon: Icon(Icons.switch_camera, color: Colors.amber),
+            icon: Icon(Icons.switch_camera, color: Colors.amberAccent),
           ),
         ],
       ),
@@ -135,7 +176,11 @@ class CameraScreenState extends State<CameraScreen> {
                 child: Center(
                   child: IconButton(
                     onPressed: () => takePicture(context),
-                    icon: Icon(Icons.camera, size: 80, color: Colors.amber),
+                    icon: Icon(
+                      Icons.camera,
+                      size: 80,
+                      color: Colors.amberAccent,
+                    ),
                   ),
                 ),
               ),

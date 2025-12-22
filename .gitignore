@@ -46,7 +46,7 @@ app.*.map.json
 
 *.tflite
 *.keras
-saved_model/
+assets/models/**
 
 /android/build/reports/problems/**
 
