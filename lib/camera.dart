@@ -24,6 +24,7 @@ class CameraScreenState extends State<CameraScreen> {
   bool isInitialized = false;
   bool permissionGranted = false;
   bool _aiInitialized = false;
+  bool _flashOn = false;
   final AIService _aiService = AIService();
 
   @override
@@ -51,6 +52,27 @@ class CameraScreenState extends State<CameraScreen> {
       setState(() {
         permissionGranted = false;
       });
+    }
+  }
+
+  Future<void> toggleFlash() async {
+    if (!controller.value.isInitialized) return;
+
+    try {
+      if (_flashOn) {
+        await controller.setFlashMode(FlashMode.off);
+      } else {
+        await controller.setFlashMode(FlashMode.torch);
+      }
+
+      setState(() {
+        _flashOn = !_flashOn;
+      });
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Erro ao controlar flash: $e',
+        toastLength: Toast.LENGTH_SHORT,
+      );
     }
   }
 
@@ -113,7 +135,11 @@ class CameraScreenState extends State<CameraScreen> {
 
   void switchCamera() async {
     final newIndex = (selectedCameraIndex + 1) % widget.cameras.length;
+
+    await controller.setFlashMode(FlashMode.off);
+
     setState(() {
+      _flashOn = false;
       isInitialized = false;
     });
 
@@ -161,6 +187,13 @@ class CameraScreenState extends State<CameraScreen> {
           IconButton(
             onPressed: switchCamera,
             icon: Icon(Icons.switch_camera, color: Colors.amberAccent),
+          ),
+          IconButton(
+            onPressed: toggleFlash,
+            icon: Icon(
+              _flashOn ? Icons.flash_on : Icons.flash_off,
+              color: _flashOn ? Colors.amberAccent : Colors.white,
+            ),
           ),
         ],
       ),

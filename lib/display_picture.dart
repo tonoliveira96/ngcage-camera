@@ -55,7 +55,6 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       final File imageFile = File(widget.imagePath);
       final Uint8List imageBytes = await imageFile.readAsBytes();
 
-
       // Decodificar a imagem
       img.Image? image = img.decodeImage(imageBytes);
       if (image == null) {
@@ -256,7 +255,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _canSavePicture() ? null: _savePicture,
+              onPressed: _canSavePicture() ? null : _savePicture,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _canSavePicture() ? Colors.blue : Colors.grey,
                 minimumSize: const Size(double.infinity, 50),
