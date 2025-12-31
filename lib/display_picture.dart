@@ -81,8 +81,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
         _analysisResult = {
           'success': true,
           'topClass': results['topClass'],
-          'topClassName': results['topClassName'],
-          'topScore': results['topScore'],
+          'topClassName': results['topClassName'].toString().toUpperCase(),
+          'topScore': results['confidence'].toStringAsFixed(2),
           'allResults': results['results'],
         };
       });
@@ -128,70 +128,74 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   Map<String, dynamic> _processResults(List<double> output) {
-    // Validação: o modelo foi treinado com 2 classes (cage, not_cage)
+    const double MIN_CONFIDENCE = 0.70;
+    const double STRONG_CONFIDENCE = 0.85;
+
+    // Segurança
+    final labels = widget.labels ?? ['cage', 'not_cage'];
+
     if (output.length != 2) {
       debugPrint(
-        "⚠️ AVISO: Saída esperada para 2 classes, mas recebeu ${output.length}",
+        "⚠️ AVISO: Modelo binário esperado (2 classes), mas recebeu ${output.length}",
       );
     }
 
-    // Encontrar a classe com maior confiança
-    double maxScore = 0.0;
+    // Encontrar maior score
     int maxIndex = 0;
+    double maxScore = output[0];
 
-    for (int i = 0; i < output.length; i++) {
+    for (int i = 1; i < output.length; i++) {
       if (output[i] > maxScore) {
         maxScore = output[i];
         maxIndex = i;
       }
     }
 
-    // Obter label correspondente
-    String? className;
-    if (maxIndex < widget.labels!.length) {
-      className = widget.labels![maxIndex];
+    final String predictedLabel = maxIndex < labels.length
+        ? labels[maxIndex]
+        : "Classe $maxIndex";
+
+    // Determinar status lógico
+    String status;
+    if (maxScore < MIN_CONFIDENCE) {
+      status = "NOT_CAGE";
+    } else if (maxScore < STRONG_CONFIDENCE) {
+      status = "INCONCLUSIVE";
     } else {
-      className = "Classe $maxIndex";
+      status = predictedLabel == "cage" ? "CAGE" : "NOT_CAGE";
     }
 
-    // Ordenar resultados por confiança
-    final List<MapEntry<int, double>> indexed = output.asMap().entries.toList();
-    indexed.sort((a, b) => b.value.compareTo(a.value));
+    // Ordenar resultados
+    final indexed = output.asMap().entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
-    // Top 5 resultados (ou todos, se menos de 5)
-    final topResults = indexed.take(5).map((e) {
-      final label = e.key < widget.labels!.length
-          ? widget.labels![e.key]
-          : "Classe ${e.key}";
+    final topResults = indexed.map((e) {
+      final label = e.key < labels.length ? labels[e.key] : "Classe ${e.key}";
       return {
         'index': e.key,
         'label': label,
         'rawScore': e.value,
-        'confidence': (e.value * 100).toStringAsFixed(2),
+        'confidence': (e.value * 100),
       };
     }).toList();
 
-    debugPrint("🎯 Resultado da Inferência:");
-    debugPrint("   Classe detectada: $className (índice $maxIndex)");
-    debugPrint("   Confiança: ${(maxScore * 100).toStringAsFixed(2)}%");
-    debugPrint("   Scores brutos: $output");
-
     return {
-      'topClass': maxIndex,
-      'topClassName': className,
-      'topScore': (maxScore * 100).toStringAsFixed(2),
+      'status': status, // CAGE | NOT_CAGE | INCONCLUSIVE
+      'topClassIndex': maxIndex,
+      'topClassName': predictedLabel,
+      'confidence': (maxScore * 100),
       'results': topResults,
     };
   }
 
   bool _canSavePicture() {
-    // Só permite salvar se análise foi bem-sucedida e não é 'cage'
-    if (_analysisResult == null || _analysisResult!['success'] == true) {
-      return true; // Permite salvar se não houve análise (falha safe)
-    }
+    if (_analysisResult == null) return false;
 
-    final className = (_analysisResult!['topClassName'] ?? '').toLowerCase();
-    return className == 'cage';
+    final className = (_analysisResult!['topClassName'] ?? '')
+        .toString()
+        .toLowerCase();
+
+    return className == 'CAGE';
   }
 
   Future<void> _savePicture() async {
@@ -223,6 +227,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool canSave = _canSavePicture();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -255,15 +261,15 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _canSavePicture() ? null : _savePicture,
+              onPressed: canSave ? _savePicture : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _canSavePicture() ? Colors.blue : Colors.grey,
+                backgroundColor: canSave ? Colors.blue : Colors.grey,
                 minimumSize: const Size(double.infinity, 50),
               ),
               child: Text(
-                _canSavePicture()
+                canSave
                     ? 'Salvar Foto'
-                    : 'Não é seguro salvar (Sem Cage detectado)',
+                    : '(Sem Cage detectado)',
                 style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
@@ -274,6 +280,10 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   Widget _buildAnalysisResult() {
+    if (_analysisResult == null) {
+      return const SizedBox.shrink();
+    }
+
     if (_analysisResult!['success'] == false) {
       return Container(
         color: Colors.red[100],
@@ -295,10 +305,29 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       );
     }
 
-    final className = _analysisResult!['topClassName'] ?? 'Desconhecido';
-    final isCage = className.toLowerCase() == 'cage';
+    final String className = _analysisResult!['topClassName'];
+    final String topScore = _analysisResult!['topScore'];
 
-    final color = isCage ? Colors.green : Colors.red;
+    final bool isCage = className == 'CAGE';
+    final bool isInconclusive = className == 'INCONCLUSIVE';
+
+    final MaterialColor color = isCage
+        ? Colors.green
+        : isInconclusive
+        ? Colors.orange
+        : Colors.red;
+
+    final IconData icon = isCage
+        ? Icons.check_circle
+        : isInconclusive
+        ? Icons.help
+        : Icons.warning;
+
+    final String message = isCage
+        ? 'Cage detectado — Seguro salvar'
+        : isInconclusive
+        ? 'Resultado inconclusivo — Melhor não salvar'
+        : 'Não é Cage — Não salvar';
 
     return Container(
       color: color[50],
@@ -306,7 +335,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho com resultado principal
+          // Cabeçalho
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -344,7 +373,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${_analysisResult!['topScore']}%',
+                    '$topScore%',
                     style: TextStyle(
                       color: color,
                       fontWeight: FontWeight.bold,
@@ -356,7 +385,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          // Status textual
+
+          // Status
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -366,17 +396,11 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
             ),
             child: Row(
               children: [
-                Icon(
-                  isCage ? Icons.check_circle : Icons.warning,
-                  color: color,
-                  size: 24,
-                ),
+                Icon(icon, color: color, size: 24),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isCage
-                        ? 'Cage detectado - Seguro salvar'
-                        : 'Sem Cage - Não salvar',
+                    message,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
